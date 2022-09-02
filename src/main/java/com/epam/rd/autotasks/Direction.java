@@ -1,6 +1,7 @@
 package com.epam.rd.autotasks;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 public enum Direction {
     N(0), NE(45), E(90), SE(135), S(180), SW(225), W(270), NW(315);
@@ -11,19 +12,53 @@ public enum Direction {
 
     private int degrees;
 
+    public int getDegrees() {
+        return degrees;
+    }
+
+    private static final Map<Integer, Direction> lookup = new HashMap<Integer, Direction>();
+
+    static {
+        for (Direction d : Direction.values()) {
+            lookup.put(d.getDegrees(), d);
+        }
+    }
+
+    private static int degreesToRange(int degrees) {
+        int _degrees = degrees;
+        while (_degrees < 0) _degrees += 360;
+        return _degrees % 360;
+    }
+
     public static Direction ofDegrees(int degrees) {
-        throw new UnsupportedOperationException();
+        return lookup.getOrDefault(degreesToRange(degrees), null);
     }
 
     public static Direction closestToDegrees(int degrees) {
-        throw new UnsupportedOperationException();
+        Direction d = ofDegrees(degrees);
+        if (d == null) {
+            int _degrees = degreesToRange(degrees);
+            Direction ret = null;
+            int distance = 361;
+            for (Integer i : lookup.keySet()) {
+                if (distance > Math.abs(i - _degrees)) {
+                    distance = Math.abs(i - _degrees);
+                    ret = ofDegrees(i);
+                }
+            }
+            return ret;
+        } else
+            return d;
     }
 
     public Direction opposite() {
-        throw new UnsupportedOperationException();
+        return ofDegrees(degreesToRange(degrees + 180));
     }
 
     public int differenceDegreesTo(Direction direction) {
-        throw new UnsupportedOperationException();
+        int q = Math.abs(degrees - direction.getDegrees());
+        if (q > 180)
+            return 360 - q;
+        return q;
     }
 }
